@@ -1,113 +1,206 @@
-
 # SQL Injection
 
-## What Is SQL Injection?
+## Definition
 
-SQL Injection (SQLi) is a web security vulnerability that occurs when
-untrusted user input is included directly in an SQL query.
+**SQL Injection (SQLi)** is a vulnerability that occurs when untrusted user input is incorporated into an SQL query without proper handling.
 
-An attacker may be able to manipulate the SQL query by providing
-specially crafted input.
+An attacker may be able to manipulate the query and make the database perform unintended operations.
 
-## Why Does SQL Injection Happen?
+---
 
-SQL injection happens when an application builds SQL queries using
-untrusted input without safely separating data from SQL code.
+## How It Works
 
-### Vulnerable Example
+A vulnerable application may construct a query using user input:
 
-```sql
-SELECT * FROM users WHERE username = 'USER_INPUT';
-````
+```text
+User Input
+    ↓
+Application
+    ↓
+SQL Query
+    ↓
+Database
+```
 
-If `USER_INPUT` is directly controlled by the user, the SQL query
-may be manipulated.
+If the input is not properly handled, the attacker may be able to modify the intended SQL query.
 
-## What Can SQL Injection Do?
+---
 
-Depending on the application and database, SQL injection may allow an
-attacker to:
+## Common SQL Injection Types
 
-* Bypass authentication
-* Read data from the database
-* Modify data
-* Delete data
-* Access information belonging to other users
-* Perform other database operations
+### 1. In-Band / Visible SQLi
 
-## Types of SQL Injection
+The application directly reveals useful database information.
 
-* In-band SQL Injection
-* UNION-based SQL Injection
-* Blind SQL Injection
-* Boolean-based Blind SQL Injection
-* Time-based Blind SQL Injection
-* Out-of-band SQL Injection
+Common technique:
 
-## SQL Injection in Web Applications
+* `UNION SELECT`
 
-SQL injection can occur when user-controlled input is included in
-parts of an SQL query such as:
+Can be used to:
 
-* `WHERE` clauses
-* `ORDER BY` clauses
-* `INSERT` statements
-* `UPDATE` statements
-* `DELETE` statements
+* Determine the number of columns.
+* Retrieve data from other tables.
+* Extract usernames and passwords.
 
-## Key Concepts I Learned
+---
 
-### Query Manipulation
+### 2. Authentication Bypass
 
-SQL injection can change the logic of an existing SQL query instead of
-simply providing normal data.
+SQL injection can sometimes manipulate a login query so that authentication conditions are bypassed.
 
-### Authentication Bypass
+The result depends on how the application's SQL query is constructed.
 
-SQL injection can sometimes manipulate an authentication query so that
-the application accepts a login without the correct password.
+---
 
-### UNION Attacks
+### 3. Blind SQL Injection
 
-A UNION attack can combine the results of an injected query with the
-original query and retrieve data from other database tables.
+The application does not directly return the result of the injected SQL.
 
-The number of columns returned by the injected query must match the
-original query.
+Instead, information must be inferred through another observable behavior.
 
-### Blind SQL Injection
+Common approaches:
 
-Blind SQL injection occurs when the application does not directly return
-the results of the injected SQL query.
+* Conditional responses
+* Conditional errors
+* Time delays
+* Out-of-band interactions
 
-Information can instead be extracted by observing differences in the
-application's responses or errors.
+---
 
-### Database-Specific Techniques
+### 4. Error-Based SQLi
 
-SQL injection techniques can differ between database systems.
+The database produces an error that reveals information or can be used as a signal.
 
-For example, Oracle uses the `DUAL` table for certain `SELECT` statements,
-and provides database-specific functions and tables such as `v$version`.
+Conceptually:
 
-## Things I Need to Learn
+```text
+SQL Injection
+      ↓
+Database error
+      ↓
+Observable difference
+      ↓
+Information can be inferred
+```
 
-* How to identify SQL injection (✅)
-* How SQL queries are manipulated (✅)
-* How authentication bypass works (✅)
-* How UNION-based SQL injection works (✅)
-* How to determine the number of columns (✅)
-* How to determine which columns contain useful data (✅)
-* How to retrieve multiple values in a single column (✅)
-* How blind SQL injection works (✅)
-* How blind SQL injection with conditional responses works (✅)
-* How blind SQL injection with conditional errors works (✅)
-* How time-based SQL injection works
-* How SQL injection can be prevented
+---
 
-## Labs
+### 5. Time-Based SQLi
 
-My practical SQL injection experience is documented in:
+The attacker causes the database to delay its response under a specific condition.
 
-* `labs/portswigger/sql-injection/`
+```text
+Condition TRUE
+      ↓
+Delay
+      ↓
+Longer response
 
+Condition FALSE
+      ↓
+No delay
+      ↓
+Normal response
+```
+
+This can be used to infer information one condition at a time.
+
+---
+
+### 6. Out-of-Band SQLi
+
+The database is induced to interact with an external system controlled or monitored by the attacker.
+
+```text
+SQL Injection
+      ↓
+Database
+      ↓
+External interaction
+      ↓
+Attacker observes interaction
+```
+
+OOB can be used to:
+
+* Confirm SQL execution.
+* Exfiltrate data.
+
+The exact technique depends heavily on the database system.
+
+---
+
+## Impact
+
+Depending on the vulnerability and database privileges, SQL Injection may allow an attacker to:
+
+* Read sensitive database information.
+* Retrieve credentials.
+* Bypass authentication.
+* Modify database records.
+* Delete data.
+* Potentially perform further actions through database functionality.
+
+The actual impact depends on the application's database permissions and configuration.
+
+---
+
+## Important Concepts
+
+### UNION
+
+`UNION` can combine the results of multiple `SELECT` statements.
+
+Useful for retrieving data from other queries when the number and types of columns are compatible.
+
+### `DUAL`
+
+Oracle provides the `DUAL` table, which can be used when a `SELECT` statement needs a table reference.
+
+### Blind SQLi
+
+When the database result is not directly visible, use an observable side channel:
+
+```text
+Response
+Error
+Timing
+OOB
+```
+
+### OOB Data Exfiltration
+
+Instead of returning data through the application, sensitive information can be incorporated into an external request.
+
+```text
+Database data
+      ↓
+External request
+      ↓
+Attacker-controlled endpoint
+```
+
+---
+
+## Prevention
+
+SQL Injection can be prevented primarily by:
+
+* Using **parameterized queries / prepared statements**.
+* Avoiding dynamic SQL construction with untrusted input.
+* Applying appropriate input validation.
+* Using least-privilege database accounts.
+* Properly handling database errors.
+* Avoiding unnecessary database functionality and privileges.
+
+---
+
+## Key Takeaways
+
+* SQLi occurs when attacker-controlled input can alter an SQL query.
+* SQLi can be visible or blind.
+* Blind SQLi requires an observable side channel.
+* Different DBMSs have different syntax and capabilities.
+* `UNION`, errors, timing, and OOB interactions are different ways of obtaining information from a SQLi vulnerability.
+* OOB SQLi uses an **external interaction as the information channel**.
+* Understanding the underlying technique is more important than memorizing payloads.
