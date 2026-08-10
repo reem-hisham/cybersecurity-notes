@@ -25,6 +25,8 @@ username
 
 ## 2. Test for SQL Injection
 
+
+
 Start by checking whether modifying the input changes the application's behavior.
 
 Consider:
@@ -34,6 +36,37 @@ Consider:
 * Boolean conditions
 * Errors
 * Response differences
+
+## If the Payload Is Blocked
+
+If an obvious SQL injection payload is blocked, determine whether the
+application is actually vulnerable or whether a WAF/filter is preventing
+the payload from reaching the database.
+
+Consider:
+
+- How the input is encoded.
+- Whether the input is inside XML, JSON, URL encoding, etc.
+- How the application transforms the input before processing it.
+- Whether the filter detects specific SQL keywords or characters.
+
+For XML-based input, XML entity encoding may change how the payload appears
+to the filter while still being interpreted by the XML parser.
+
+```text
+Original payload
+      ↓
+WAF detects SQL pattern
+      ↓
+Blocked
+
+Encoded payload
+      ↓
+XML parser decodes it
+      ↓
+SQL reaches the application/database
+```
+
 
 The goal is to determine:
 

@@ -109,6 +109,37 @@ I used it for OOB SQL injection labs to:
 7. Use Collaborator when testing OOB behavior
 ```
 
+
+# Hackvertor
+
+## Purpose
+
+Hackvertor is a Burp Suite extension used to encode and decode data using
+different transformations.
+
+## What I Used
+
+I used Hackvertor during a PortSwigger SQL Injection lab to encode SQL
+payloads inside XML.
+
+The transformations I used were:
+
+- `dec_entities`
+- `hex_entities`
+
+## Use Case
+
+```text
+SQL Injection payload
+        ↓
+Hackvertor encoding
+        ↓
+XML-encoded payload
+        ↓
+WAF/filter
+        ↓
+Application/XML parser
+```
 ---
 
 ## Key Takeaways
@@ -117,3 +148,5 @@ I used it for OOB SQL injection labs to:
 * **Repeater** → Manually replay and modify requests.
 * **Intruder** → Automate repeated requests.
 * **Collaborator** → Detect out-of-band interactions.
+* **Hackvertor** → useful when testing how applications and security filters
+handle different encodings and transformations.

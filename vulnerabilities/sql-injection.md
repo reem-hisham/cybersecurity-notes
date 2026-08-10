@@ -182,6 +182,29 @@ Attacker-controlled endpoint
 
 ---
 
+
+### WAF / Filter Bypass
+
+A SQL injection payload may be blocked by a WAF or input filter even when
+the underlying parameter is vulnerable.
+
+Possible approaches depend on the context and filtering mechanism.
+
+In XML-based input, encoding SQL characters using XML entities can sometimes
+bypass filters that detect the original representation of the payload.
+
+Important:
+A WAF blocking a payload does not necessarily mean the application is not
+vulnerable.
+
+### SQL Injection Through XML
+
+XML input can contain user-controlled values that are later used in SQL
+queries.
+
+Therefore, XML parameters should also be considered when identifying
+potential SQL injection points.
+
 ## Prevention
 
 SQL Injection can be prevented primarily by:
